@@ -1,5 +1,6 @@
 package matrix_consumer;
 
+import jcuda_matrix.jcuda_matrix;
 
 import java.util.HashMap;
 import java.util.List;
@@ -7,10 +8,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
 
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
@@ -29,9 +26,9 @@ public class matrix_consumer {
 
 	public static void main(String[] args) throws Exception {
 		
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+	//	System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
-		
+		jcuda_matrix jcuda = new jcuda_matrix(529);
 		Properties props = new Properties();
 		props.put("group.id", "super-group");
 		props.put("zookeeper.connect", "163.152.174.73:2182");
@@ -44,24 +41,27 @@ public class matrix_consumer {
 		List<KafkaStream<byte[], byte[]>> streams = consumerMap.get(TOPIC);
 		ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
 		
+		
 		for (final KafkaStream<byte[], byte[]> stream : streams) {
 
 			executor.execute(new Runnable() {
 
 				public void run() {
 
-					MyFrame frame = new MyFrame();
+		//			MyFrame frame = new MyFrame();
 
 					for (MessageAndMetadata<byte[], byte[]> messageAndMetadata : stream) {
 
 						byte[] test = messageAndMetadata.message();
 
-						Mat data = new Mat(480, 640, CvType.CV_8UC3);
+						
+						
+	//					Mat data = new Mat(480, 640, CvType.CV_8UC3);
 
-						data.put(0, 0, test);
+	//					data.put(0, 0, test);
 
-						frame.setVisible(true);
-						frame.render(data);
+	//					frame.setVisible(true);
+	//					frame.render(data);
 
 						System.out.println("one_complete!");
 

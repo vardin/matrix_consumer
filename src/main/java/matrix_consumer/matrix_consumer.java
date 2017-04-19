@@ -29,7 +29,10 @@ public class matrix_consumer {
 	//	System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
 		jcuda_matrix jcuda = new jcuda_matrix(529);
+		
+		
 		Properties props = new Properties();
+		jcuda_matrix jcuda_matrix = new jcuda_matrix(23);
 		props.put("group.id", "super-group");
 		props.put("zookeeper.connect", "163.152.174.73:2182");
 		props.put("auto.commit.interval.ms", "100");
@@ -54,7 +57,7 @@ public class matrix_consumer {
 
 						byte[] test = messageAndMetadata.message();
 
-						
+
 						
 	//					Mat data = new Mat(480, 640, CvType.CV_8UC3);
 

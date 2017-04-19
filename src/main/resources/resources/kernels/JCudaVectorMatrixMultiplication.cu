@@ -1,14 +1,14 @@
 extern "C"
-__global__ void multiplication(int* M, int* N, int* P, int Width)
+__global__ void multiplication(char* M, char* N, char* P, int Width)
 {
     int tid, tx, ty;
 	tx = blockDim.x*blockIdx.x + threadIdx.x;
 	ty = blockDim.y*blockIdx.y + threadIdx.y;
 	tid = Width*ty + tx;
        
-  	int Value = 0;
-	int MVal = 0;
-	int NVal = 0;
+  	char Value = 0;
+	char MVal = 0;
+	char NVal = 0;
 
 	for (int i = 0; i < Width; i++)
 	{

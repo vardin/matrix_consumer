@@ -32,9 +32,9 @@ public class jcuda_matrix {
 	int blockSizeX;
 	int gridSizeX;
 	Pointer kernelParameters;
-	int hostInputA[];
-	int hostInputB[];
-	int hostOutput[];
+	byte hostInputA[];
+	byte hostInputB[];
+	byte hostOutput[];
 	CUdeviceptr deviceInputA;
 	CUdeviceptr deviceInputB;
 	CUdeviceptr deviceOutput;
@@ -71,29 +71,40 @@ public class jcuda_matrix {
 		
 	}
 	
-	public void prepare_cuda_memory()
+	public void prepare_cuda_memory(byte[] InputA)
 	{
 		// Allocate and fill the host input data
-				hostInputA = new int[numElemnets];
-				hostInputB = new int[numElemnets];
-				hostOutput = new int[numElemnets];
+		
+		/*
+		  
+		 
+		hostInputA = new int[numElemnets];
+		hostInputB = new int[numElemnets];
+		hostOutput = new int[numElemnets];
 				for (int i = 0; i < numElemnets; i++) {
 					hostInputA[i] = (int) i;
 					hostInputB[i] = (int) i;
 				}
+				
+				*/
 
 				// Allocate the device input data, and copy the
 				// host input data to the device
-				deviceInputA = new CUdeviceptr();
-				cuMemAlloc(deviceInputA, numElemnets * Sizeof.INT);
-				deviceInputB = new CUdeviceptr();
-				cuMemAlloc(deviceInputB, numElemnets * Sizeof.INT);
-				deviceOutput = new CUdeviceptr();
-				cuMemAlloc(deviceOutput, numElemnets * Sizeof.INT);
+				
+				hostInputA = InputA;
+				hostInputB = InputA;
+				
 		
-				cuMemcpyHtoD(deviceInputA, Pointer.to(hostInputA), numElemnets * Sizeof.INT);
+				deviceInputA = new CUdeviceptr();
+				cuMemAlloc(deviceInputA, numElemnets * Sizeof.BYTE);
+				deviceInputB = new CUdeviceptr();
+				cuMemAlloc(deviceInputB, numElemnets * Sizeof.BYTE);
+				deviceOutput = new CUdeviceptr();
+				cuMemAlloc(deviceOutput, numElemnets * Sizeof.BYTE);
+		
+				cuMemcpyHtoD(deviceInputA, Pointer.to(hostInputA), numElemnets * Sizeof.BYTE);
 
-				cuMemcpyHtoD(deviceInputB, Pointer.to(hostInputB), numElemnets * Sizeof.INT);
+				cuMemcpyHtoD(deviceInputB, Pointer.to(hostInputB), numElemnets * Sizeof.BYTE);
 
 				// Allocate device output memory
 
@@ -133,6 +144,8 @@ public class jcuda_matrix {
 	
 	
 	public void cudaCleanUp(){
+		
+		
 		// Clean up.
 		
 		cuMemFree(deviceInputA);

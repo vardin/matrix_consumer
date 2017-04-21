@@ -20,19 +20,15 @@ import kafka.message.MessageAndMetadata;
 public class matrix_consumer {
 		
 	private static final String TOPIC = "supercom";
-	private static final int NUM_THREADS = 10;
+	private static final int NUM_THREADS = 1;
 	
-//	static{ System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
+	//	static{ System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
 
 	public static void main(String[] args) throws Exception {
 		
 	//	System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		
-		jcuda_matrix jcuda = new jcuda_matrix(529);
-		
-		
 		Properties props = new Properties();
-		jcuda_matrix jcuda_matrix = new jcuda_matrix(23);
+		final jcuda_matrix jcuda_matrix = new jcuda_matrix(23);
 		props.put("group.id", "super-group");
 		props.put("zookeeper.connect", "163.152.174.73:2182");
 		props.put("auto.commit.interval.ms", "100");
@@ -43,36 +39,31 @@ public class matrix_consumer {
 		Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumer.createMessageStreams(topicCountMap);
 		List<KafkaStream<byte[], byte[]>> streams = consumerMap.get(TOPIC);
 		ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
-		
-		
+			
 		for (final KafkaStream<byte[], byte[]> stream : streams) {
 
 			executor.execute(new Runnable() {
 
 				public void run() {
-
 		//			MyFrame frame = new MyFrame();
+					jcuda_matrix jcuda = new jcuda_matrix(23);
 
 					for (MessageAndMetadata<byte[], byte[]> messageAndMetadata : stream) {
-
+						System.out.println("1st test!!!!!");
 						byte[] test = messageAndMetadata.message();
-
-
-						
+						System.out.println("2nd test!!!!!");
+						jcuda_matrix.prepare_cuda_memory(test);
+						jcuda_matrix.cuda_execution();
+						System.out.println("3rd test!!!!!");
 	//					Mat data = new Mat(480, 640, CvType.CV_8UC3);
-
 	//					data.put(0, 0, test);
-
 	//					frame.setVisible(true);
 	//					frame.render(data);
-
 						System.out.println("one_complete!");
-
+						jcuda_matrix.cudaCleanUp();
 					}
 				}
-
 			});
-
 		}
 
 		Thread.sleep(20000);
@@ -81,6 +72,4 @@ public class matrix_consumer {
 		executor.shutdown();
 	}
 	
-	
-
 }

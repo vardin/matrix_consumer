@@ -27,6 +27,7 @@ public class jcuda_matrix {
 	
 	
 	int width;
+	int block_gridsize;
 	int numElemnets;
 	CUfunction function;
 	int blockSizeX;
@@ -65,7 +66,7 @@ public class jcuda_matrix {
 		// Obtain a function pointer to the "add" function.
 		function = new CUfunction();
 		cuModuleGetFunction(function, module, "multiplication");
-
+		this.block_gridsize= input_width;
 		this.width = input_width*input_width;
 		numElemnets = (width) * (width);
 		
@@ -116,9 +117,9 @@ public class jcuda_matrix {
 
 				// Call the kernel function.
 
-				blockSizeX = (int)Math.sqrt(width); //the number of thread
+				blockSizeX = this.block_gridsize; //the number of thread
 				// int gridSizeX = (int)Math.ceil((double)numElements / blockSizeX);
-				gridSizeX = (int)Math.sqrt(width);	 //the number of block
+				gridSizeX = this.block_gridsize;	 //the number of block
 		
 	}
 	
@@ -135,7 +136,7 @@ public class jcuda_matrix {
 		// Allocate host output memory and copy the device output
 		// to the host.
 
-		cuMemcpyDtoH(Pointer.to(hostOutput), deviceOutput, numElemnets * Sizeof.INT);
+		cuMemcpyDtoH(Pointer.to(hostOutput), deviceOutput, numElemnets * Sizeof.BYTE);
 		
 		System.out.println(hostOutput[0]);
 		// Verify the result

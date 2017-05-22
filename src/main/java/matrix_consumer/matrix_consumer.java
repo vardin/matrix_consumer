@@ -15,8 +15,6 @@ import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.MessageAndMetadata;
 
-
-
 public class matrix_consumer {
 		
 	private static final String TOPIC = "supercom";
@@ -24,7 +22,7 @@ public class matrix_consumer {
 	
 	//	static{ System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
 
-	public static void main(String[] args) throws Exception {
+	public static void main (String[] args) throws Exception  {
 		
 	//	System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		Properties props = new Properties();
@@ -38,38 +36,44 @@ public class matrix_consumer {
 		topicCountMap.put(TOPIC, NUM_THREADS);
 		Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumer.createMessageStreams(topicCountMap);
 		List<KafkaStream<byte[], byte[]>> streams = consumerMap.get(TOPIC);
-		ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
-			
+	//	ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
+		jcuda_matrix jcuda = new jcuda_matrix(23);
+		
+		
+		System.out.println("partial success!");
+		
 		for (final KafkaStream<byte[], byte[]> stream : streams) {
-
-			executor.execute(new Runnable() {
-
-				public void run() {
-		//			MyFrame frame = new MyFrame();
-					jcuda_matrix jcuda = new jcuda_matrix(23);
-
+	
+		//		MyFrame frame = new MyFrame();
+		
 					for (MessageAndMetadata<byte[], byte[]> messageAndMetadata : stream) {
-						System.out.println("1st test!!!!!");
-						byte[] test = messageAndMetadata.message();
-						System.out.println("2nd test!!!!!");
+	
+						byte[] test =messageAndMetadata.message();
+					
+						System.out.println("test [0]" +test[0]);
+						System.out.println("test [1]" +test[1]);
+						System.out.println("test [2]" +test[2]);
 						jcuda_matrix.prepare_cuda_memory(test);
-						jcuda_matrix.cuda_execution();
+				
+		
 						System.out.println("3rd test!!!!!");
-	//					Mat data = new Mat(480, 640, CvType.CV_8UC3);
-	//					data.put(0, 0, test);
-	//					frame.setVisible(true);
-	//					frame.render(data);
+						jcuda_matrix.cuda_execution();
+						System.out.println("4th test!!!!!");
+						// Mat data = new Mat(480, 640, CvType.CV_8UC3);
+						// data.put(0, 0, test);
+						// frame.setVisible(true);
+						// frame.render(data);
 						System.out.println("one_complete!");
 						jcuda_matrix.cudaCleanUp();
 					}
-				}
-			});
-		}
-
-		Thread.sleep(20000);
+			
 		System.out.println("empty topic!!");
 		consumer.shutdown();
-		executor.shutdown();
-	}
 	
+		}
+
+	
+	
+	}
 }
+

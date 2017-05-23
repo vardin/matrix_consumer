@@ -39,7 +39,6 @@ public class matrix_consumer {
 	//	ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
 		jcuda_matrix jcuda = new jcuda_matrix(23);
 		
-		
 		System.out.println("partial success!");
 		
 		for (final KafkaStream<byte[], byte[]> stream : streams) {
@@ -49,16 +48,10 @@ public class matrix_consumer {
 					for (MessageAndMetadata<byte[], byte[]> messageAndMetadata : stream) {
 	
 						byte[] test =messageAndMetadata.message();
-					
-						System.out.println("test [0]" +test[0]);
-						System.out.println("test [1]" +test[1]);
-						System.out.println("test [2]" +test[2]);
+									
 						jcuda_matrix.prepare_cuda_memory(test);
-				
-		
-						System.out.println("3rd test!!!!!");
 						jcuda_matrix.cuda_execution();
-						System.out.println("4th test!!!!!");
+		
 						// Mat data = new Mat(480, 640, CvType.CV_8UC3);
 						// data.put(0, 0, test);
 						// frame.setVisible(true);

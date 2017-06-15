@@ -24,19 +24,19 @@ import jcuda.samples.utils.*;
 
 public class jcuda_matrix {
 		
-	int width;
-	int block_gridsize;
-	int numElements;
-	CUfunction function;
+	static int width;
+	static int block_gridsize;
+	static int numElements;
+	static CUfunction function;
 	int blockSizeX;
 	int gridSizeX;
-	Pointer kernelParameters;
-	byte hostInputA[];
-	byte hostInputB[];
-	byte hostOutput[];
-	CUdeviceptr deviceInputA;
-	CUdeviceptr deviceInputB;
-	CUdeviceptr deviceOutput;
+	static Pointer kernelParameters;
+	static byte hostInputA[];
+	static byte hostInputB[];
+	static byte hostOutput[];
+	static CUdeviceptr deviceInputA;
+	static CUdeviceptr deviceInputB;
+	static CUdeviceptr deviceOutput;
 	
 	public jcuda_matrix(int input_width){
 			
@@ -82,7 +82,7 @@ public class jcuda_matrix {
 		
 	}
 	
-	public void prepare_cuda_memory(byte[] InputA)
+	public static void prepare_cuda_memory(byte[] InputA)
 	{
 	// Allocate and fill the host input data
 
@@ -110,40 +110,44 @@ public class jcuda_matrix {
 
 				// Set up the kernel parameters: A pointer to an array
 				// of pointers which point to the actual values.
-
-				kernelParameters = Pointer.to(Pointer.to(deviceInputA),
-						Pointer.to(deviceInputB), Pointer.to(deviceOutput),Pointer.to(new int[] { this.width }));
-
-	//			blockSizeX = this.block_gridsize; //the number of thread
-				// int gridSizeX = (int)Math.ceil((double)numElements / blockSizeX);
-	//			gridSizeX = this.block_gridsize;	 //the number of block
 				
-		
+				
+				
+				
+				kernelParameters = Pointer.to(Pointer.to(deviceInputA),
+						Pointer.to(deviceInputB), Pointer.to(deviceOutput),Pointer.to(new int[] { width }));
+
+//					blockSizeX = this.block_gridsize; //the number of thread
+				// int gridSizeX = (int)Math.ceil((double)numElements / blockSizeX);
+//					gridSizeX = this.block_gridsize;	 //the number of block
 				
 				cuLaunchKernel(function, 23, 23, 1, // Grid dimension //number of block
 						23, 23, 1, // Block dimension //number of thread
 						0, null, // Shared memory size and stream
 						kernelParameters, null // Kernel- and extra parameters
 				);
-				cuCtxSynchronize();
 
+				System.out.println("this is after CUlaunchkernel");
+			
+
+			
+				
 				// Allocate host output memory and copy the device output
 				// to the host.
 
 				cuMemcpyDtoH(Pointer.to(hostOutput), deviceOutput, numElements * Sizeof.BYTE);
+				
+				System.out.println("this is after CUMemcpyDtoH");
+				
+				System.out.println(hostOutput[0]);
+				// Verify the result
+				cuCtxSynchronize();
+
 		
 	}
 	
 	
-	public void cuda_execution(){
-		
-		
-		
-		System.out.println(hostOutput[0]);
-		// Verify the result
-		
-	}
-	
+
 	
 	public void cudaCleanUp(){
 				

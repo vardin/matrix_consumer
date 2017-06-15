@@ -9,6 +9,8 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.swing.plaf.synth.SynthSeparatorUI;
+
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
 import kafka.consumer.KafkaStream;
@@ -36,31 +38,42 @@ public class matrix_consumer {
 		topicCountMap.put(TOPIC, NUM_THREADS);
 		Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumer.createMessageStreams(topicCountMap);
 		List<KafkaStream<byte[], byte[]>> streams = consumerMap.get(TOPIC);
-	//	ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
-		jcuda_matrix jcuda = new jcuda_matrix(23);
-		
+		ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
+	
 		System.out.println("partial success!");
 		
 		for (final KafkaStream<byte[], byte[]> stream : streams) {
 	
+			System.out.println("for start! 1");
+			
 		//		MyFrame frame = new MyFrame();
-		
+			executor.execute(new Runnable() {
+			
+				public synchronized void run(){
+					
+					System.out.println("for start! 2");
+				
 					for (MessageAndMetadata<byte[], byte[]> messageAndMetadata : stream) {
-	
+						System.out.println("for start! 3");
 						byte[] test =messageAndMetadata.message();
-									
+					
 						jcuda_matrix.prepare_cuda_memory(test);
-						jcuda_matrix.cuda_execution();
-		
+						
 						// Mat data = new Mat(480, 640, CvType.CV_8UC3);
 						// data.put(0, 0, test);
 						// frame.setVisible(true);
 						// frame.render(data);
+					
 						System.out.println("one_complete!");
-						jcuda_matrix.cudaCleanUp();
+					
 					}
+				}
+			});	
+		
 			
+		Thread.sleep(9000);			
 		System.out.println("empty topic!!");
+		jcuda_matrix.cudaCleanUp();
 		consumer.shutdown();
 	
 		}

@@ -70,15 +70,15 @@ public class jcuda_matrix {
 		hostInputB = new byte[numElements];
 		hostOutput= new byte[numElements];
 		
-		System.out.println("constructor is finished! " + numElements);
-		
-		
+						
 		this.deviceInputA = new CUdeviceptr();
 		cuMemAlloc(deviceInputA, numElements * Sizeof.BYTE);
 		this.deviceInputB = new CUdeviceptr();
 		cuMemAlloc(deviceInputB, numElements * Sizeof.BYTE);
 		this.deviceOutput = new CUdeviceptr();
 		cuMemAlloc(deviceOutput, numElements * Sizeof.BYTE);
+		
+		System.out.println("constructor is finished! " + numElements);
 		
 	}
 	
@@ -111,8 +111,7 @@ public class jcuda_matrix {
 				// Set up the kernel parameters: A pointer to an array
 				// of pointers which point to the actual values.
 				
-				
-				
+			
 				
 				kernelParameters = Pointer.to(Pointer.to(deviceInputA),
 						Pointer.to(deviceInputB), Pointer.to(deviceOutput),Pointer.to(new int[] { width }));
@@ -128,9 +127,7 @@ public class jcuda_matrix {
 				);
 
 				System.out.println("this is after CUlaunchkernel");
-			
-
-			
+	
 				
 				// Allocate host output memory and copy the device output
 				// to the host.
@@ -142,16 +139,12 @@ public class jcuda_matrix {
 				System.out.println(hostOutput[0]);
 				// Verify the result
 				cuCtxSynchronize();
-
 		
 	}
 	
-	
 
-	
 	public void cudaCleanUp(){
-				
-		// Clean up.
+	
 		cuMemFree(deviceInputA);
 		cuMemFree(deviceInputB);
 		cuMemFree(deviceOutput);

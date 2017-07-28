@@ -23,7 +23,7 @@ import jcuda.driver.JCudaDriver;
 import jcuda.samples.utils.*;
 
 public class jcuda_matrix {
-
+		
 	int width;
 	int numElemnets;
 	CUfunction function;
@@ -37,8 +37,9 @@ public class jcuda_matrix {
 	CUdeviceptr deviceInputB;
 	CUdeviceptr deviceOutput;
 	
-	public jcuda_matrix(int input_width) {
-
+	public jcuda_matrix(int input_width){
+	
+		
 		// Enable exceptions and omit all subsequent error checks
 		JCudaDriver.setExceptionsEnabled(true);
 
@@ -48,7 +49,8 @@ public class jcuda_matrix {
 
 		// Initialize the driver and create a context for the first device.
 		cuInit(0);
-
+		
+		
 		CUdevice device = new CUdevice();
 		cuDeviceGet(device, 0);
 		CUcontext context = new CUcontext();
@@ -62,72 +64,90 @@ public class jcuda_matrix {
 		function = new CUfunction();
 		cuModuleGetFunction(function, module, "multiplication");
 
-		this.width = input_width * input_width;
+		this.width = input_width*input_width;
 		numElemnets = (width) * (width);
-
+		
+		System.out.println("constructor has finished! ");
+		
 	}
-
-	public void prepare_cuda_memory(byte[] input) {
+	
+	public void prepare_cuda_memory(byte[] input)
+	{
 		// Allocate and fill the host input data
-
+	
 		hostInputA = new byte[numElemnets];
 		hostInputB = new byte[numElemnets];
 		hostOutput = new byte[numElemnets];
-
-		hostInputA = input;
-		hostInputB = input;
+			
 		
-		System.out.println("hostInputA[0] =" + hostInputA[0]);
-		System.out.println(hostInputA[1]);
+		for (int i = 0; i < numElemnets; i++) {
+					hostInputA[i] = (byte) (i%128);
+					hostInputB[i] = (byte)(i%128);
+				}
+			
+				hostInputA = input.clone();
+				hostInputB = input.clone();
+		
+				System.out.println("hostInputA[0] ="+hostInputA[0]);
+				System.out.println(hostInputA[0]);
+				System.out.println(hostInputA[1]);
+				
+				// Allocate the device input data, and copy the
+				// host input data to the device
+				
+		//		hostInputA = InputA;
+	//			hostInputB = InputA;
+				
+		
+				deviceInputA = new CUdeviceptr();
+				cuMemAlloc(deviceInputA, numElemnets * Sizeof.BYTE);
+				deviceInputB = new CUdeviceptr();
+				cuMemAlloc(deviceInputB, numElemnets * Sizeof.BYTE);
+				deviceOutput = new CUdeviceptr();
+				cuMemAlloc(deviceOutput, numElemnets * Sizeof.BYTE);
+		
+				System.out.println("before Memcpy!");
+				
+				cuMemcpyHtoD(deviceInputA, Pointer.to(hostInputA), numElemnets * Sizeof.BYTE);
 
-		// Allocate the device input data, and copy the
-		// host input data to the device
+				cuMemcpyHtoD(deviceInputB, Pointer.to(hostInputB), numElemnets * Sizeof.BYTE);
 
-		// hostInputA = InputA;
-		// hostInputB = InputA;
+				// Allocate device output memory
 
-		deviceInputA = new CUdeviceptr();
-		System.out.println("before cumemalloc");
-		cuMemAlloc(deviceInputA, numElemnets * Sizeof.BYTE);
-		deviceInputB = new CUdeviceptr();
-		cuMemAlloc(deviceInputB, numElemnets * Sizeof.BYTE);
-		deviceOutput = new CUdeviceptr();
-		cuMemAlloc(deviceOutput, numElemnets * Sizeof.BYTE);
+				System.out.println("after Memcpy!");
+				
+				// Set up the kernel parameters: A pointer to an array
+				// of pointers which point to the actual values.
 
-		cuMemcpyHtoD(deviceInputA, Pointer.to(hostInputA), numElemnets * Sizeof.BYTE);
-
-		cuMemcpyHtoD(deviceInputB, Pointer.to(hostInputB), numElemnets * Sizeof.BYTE);
-		// Allocate device output memory
-		System.out.println("after cumemalloc");
-		// Set up the kernel parameters: A pointer to an array
-		// of pointers which point to the actual values.
-		kernelParameters = Pointer.to(Pointer.to(deviceInputA), Pointer.to(deviceInputB), Pointer.to(deviceOutput),
-				Pointer.to(new int[] { width }));
-		// Call the kernel function.
-		blockSizeX = width; // the number of thread
-		// int gridSizeX = (int)Math.ceil((double)numElements / blockSizeX);
-		gridSizeX = width; // the number of block
-
-		cuLaunchKernel(function, gridSizeX, gridSizeX, 1, // Grid dimension
-															// //number of block
-				blockSizeX, blockSizeX, 1, // Block dimension //number of thread
-				0, null, // Shared memory size and stream
-				kernelParameters, null // Kernel- and extra parameters
-		);
-	
-		// Allocate host output memory and copy the device output
-		// to the host.
-		cuMemcpyDtoH(Pointer.to(hostOutput), deviceOutput, numElemnets * Sizeof.BYTE);
-		cuCtxSynchronize();
-		System.out.println("hostOutputA[0] =" + hostOutput[0]);
+			kernelParameters = Pointer.to(Pointer.to(deviceInputA),
+						Pointer.to(deviceInputB), Pointer.to(deviceOutput),Pointer.to(new int[] { width }));
+				// Call the kernel function.
+				blockSizeX = 23; //the number of thread
+				// int gridSizeX = (int)Math.ceil((double)numElements / blockSizeX);
+				gridSizeX = 23;	 //the number of block
+			
+				cuLaunchKernel(function, gridSizeX, gridSizeX, 1, // Grid dimension //number of block
+						blockSizeX, blockSizeX, 1, // Block dimension //number of thread
+						0, null, // Shared memory size and stream
+						kernelParameters, null // Kernel- and extra parameters
+				);
+				cuCtxSynchronize();
+				// Allocate host output memory and copy the device output
+				// to the host.
+				cuMemcpyDtoH(Pointer.to(hostOutput), deviceOutput, numElemnets * Sizeof.BYTE);
+				
+				
+				System.out.println("result hostOutput[0] = "+hostOutput[0]);
+				System.out.println("cuda has finished!");
 	}
-
-	public void cudaCleanUp() {
+	
+	public void cudaCleanUp(){
 		// Clean up.
 		cuMemFree(deviceInputA);
 		cuMemFree(deviceInputB);
 		cuMemFree(deviceOutput);
-
+		
 	}
-
+	
+	
 }

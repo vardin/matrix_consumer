@@ -21,14 +21,13 @@ import kafka.message.MessageAndMetadata;
 public class matrix_consumer {
 
 	private static final String TOPIC = "supercom";
-	private static final int NUM_THREADS = 1;
+	private static final int NUM_THREADS = 2;
 
 	// static{ System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
 	public static void main(String[] args) throws Exception {
 
 		// System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		Properties props = new Properties();
-		final jcuda_matrix jcuda_matrix = new jcuda_matrix(23);
 		props.put("group.id", "super-group");
 		props.put("zookeeper.connect", "163.152.174.73:2182");
 		props.put("auto.commit.interval.ms", "100");
@@ -45,31 +44,33 @@ public class matrix_consumer {
 		for (final KafkaStream<byte[], byte[]> stream : streams) {   //for 문이 2개 들어가 있는게 문제~ thread pool을 1로 수정
 			System.out.println("for start! 1");
 			// MyFrame frame = new MyFrame(); 
-				System.out.println("for start! 2 thread name : "+ Thread.currentThread().getName());
-				
+			
+				Runnable runnable = new Runnable() {
+					public void run() {
+						
 					for (final MessageAndMetadata<byte[], byte[]> messageAndMetadata : stream) {
-						Runnable runnable = new Runnable() {
-							public void run() {
+						System.out.println("for start! 2 thread name : "+ Thread.currentThread().getName());				
+						jcuda_matrix jcuda_matrix = new jcuda_matrix(23);		
 						System.out.println("for start! 3"); 
 						byte[] test = messageAndMetadata.message();
+						
 						System.out.println(test.length);
 						jcuda_matrix.prepare_cuda_memory(test);
-						jcuda_matrix.cudaCleanUp();
-
+				
 						// Mat data = new Mat(480, 640, CvType.CV_8UC3);
 						// data.put(0, 0, test);
 						// frame.setVisible(true);
 						// frame.render(data);
 						
+						System.out.println("one_complete! ");
+					
+			}
 					}
 				};
-						System.out.println("one_complete! ");
-						executor.execute(runnable);
-			}
-					
+				executor.execute(runnable);
 		}
-		
-		Thread.sleep(1000);
+	
+		Thread.sleep(100000);
 		System.out.println("empty topic!!");
 		consumer.shutdown();
 		executor.shutdown();

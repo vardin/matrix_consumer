@@ -122,9 +122,9 @@ public class jcuda_matrix {
 			kernelParameters = Pointer.to(Pointer.to(deviceInputA),
 						Pointer.to(deviceInputB), Pointer.to(deviceOutput),Pointer.to(new int[] { width }));
 				// Call the kernel function.
-				blockSizeX = 23; //the number of thread
+				blockSizeX = width; //the number of thread
 				// int gridSizeX = (int)Math.ceil((double)numElements / blockSizeX);
-				gridSizeX = 23;	 //the number of block
+				gridSizeX = width;	 //the number of block
 			
 				cuLaunchKernel(function, gridSizeX, gridSizeX, 1, // Grid dimension //number of block
 						blockSizeX, blockSizeX, 1, // Block dimension //number of thread
